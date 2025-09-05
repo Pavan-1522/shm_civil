@@ -1,0 +1,10 @@
+const firebaseConfig = {
+  apiKey: "AIzaSyDOrM7BA_ig1zqcBsOpv6BGcXoazAzp244",
+  authDomain: "shm-civil.firebaseapp.com",
+  databaseURL: "https://shm-civil-default-rtdb.firebaseio.com",
+  projectId: "shm-civil",
+  storageBucket: "shm-civil.firebasestorage.app",
+  messagingSenderId: "1001849336078",
+  appId: "1:1001849336078:web:3884be94641bfedd43275f",
+  measurementId: "G-NNPCNY94QQ"
+};

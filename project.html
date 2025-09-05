@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Structural Health Monitoring</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --success: #27ae60;
+            --danger: #e74c3c;
+            --warning: #f39c12;
+            --info: #9b59b6;
+            --light: #ecf0f1;
+            --dark: #2c3e50;
+            --gray: #95a5a6;
+            --dark-bg: #1a1a2e;
+            --card-bg: rgba(255, 255, 255, 0.1);
+            --header-bg: rgba(26, 26, 46, 0.95);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--dark-bg) 0%, #16213e 100%);
+            color: white;
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: var(--header-bg);
+            padding: 25px;
+            border-radius: 20px;
+            margin-bottom: 25px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .header h1 {
+            color: white;
+            font-size: 2.8rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        
+        .header h1 i {
+            color: var(--secondary);
+            animation: pulse 2s infinite;
+        }
+        
+        .subtitle {
+            color: var(--light);
+            font-size: 1.3rem;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+        
+        .project-info {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .info-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 0.9rem;
+        }
+        
+        .info-item strong {
+            color: var(--secondary);
+        }
+        
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-bottom: 25px;
+        }
+        
+        .node-card {
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .node-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--secondary), var(--info));
+        }
+        
+        .node-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+        }
+        
+        .node-card.online {
+            border-left: 6px solid var(--success);
+        }
+        
+        .node-card.offline {
+            border-left: 6px solid var(--danger);
+        }
+        
+        .node-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .node-id {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: white;
+        }
+        
+        .node-icon {
+            font-size: 2.2rem;
+            color: var(--secondary);
+        }
+        
+        .distance-value {
+            font-size: 3.5rem;
+            font-weight: bold;
+            color: white;
+            margin: 20px 0;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            font-family: 'Courier New', monospace;
+        }
+        
+        .distance-unit {
+            font-size: 1.4rem;
+            color: var(--light);
+            font-weight: 300;
+            margin-bottom: 20px;
+        }
+        
+        .status {
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 1rem;
+            margin: 20px 0;
+            display: inline-block;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        
+        .status-online {
+            background: var(--success);
+            color: white;
+            box-shadow: 0 0 15px rgba(39, 174, 96, 0.4);
+        }
+        
+        .status-offline {
+            background: var(--danger);
+            color: white;
+            box-shadow: 0 0 15px rgba(231, 76, 60, 0.4);
+        }
+        
+        .timestamp {
+            color: var(--light);
+            font-size: 0.9rem;
+            margin-top: 15px;
+            font-style: italic;
+        }
+        
+        .health-indicator {
+            height: 10px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+            margin: 20px 0;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .health-bar {
+            height: 100%;
+            border-radius: 5px;
+            transition: all 0.5s ease;
+            position: relative;
+        }
+        
+        .health-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+        
+        .health-good { background: var(--success); }
+        .health-warning { background: var(--warning); }
+        .health-critical { background: var(--danger); }
+        
+        .footer {
+            background: var(--header-bg);
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .system-info {
+            text-align: left;
+            flex: 1;
+        }
+        
+        .system-info div {
+            margin-bottom: 8px;
+            font-size: 1rem;
+            color: var(--light);
+        }
+        
+        .last-updated {
+            text-align: right;
+            flex: 1;
+            font-size: 1rem;
+            color: var(--light);
+        }
+        
+        .value-label {
+            font-weight: 600;
+            color: var(--secondary);
+            margin-right: 5px;
+        }
+        
+        .connection-status {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .connection-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        
+        .connected { background: var(--success); }
+        .disconnected { background: var(--danger); }
+        
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            color: var(--light);
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        
+        footer p {
+            margin: 5px 0;
+        }
+        
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+            
+            .footer {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .system-info, .last-updated {
+                text-align: center;
+            }
+            
+            .header h1 {
+                font-size: 2.2rem;
+            }
+            
+            .project-info {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        
+        .loading {
+            opacity: 0.7;
+            pointer-events: none;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 10px;
+            color: white;
+            font-weight: 600;
+            z-index: 1000;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        .notification.success {
+            background: var(--success);
+        }
+        
+        .notification.error {
+            background: var(--danger);
+        }
+        
+        .chart-container {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .tab-container {
+            margin-top: 20px;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .tab.active {
+            background: var(--secondary);
+            color: white;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-hard-hat"></i> Advanced Structural Health Monitoring</h1>
+            <div class="subtitle">Real-time IoT Framework for Structural Integrity Analysis</div>
+            <div class="project-info">
+                <div class="info-item">Guided by: <strong>Dr. G. Ganesh Prabhu</strong></div>
+                <div class="info-item">Technology: <strong>ESP32, Ultrasonic Sensors, Firebase</strong></div>
+                <div class="info-item">Framework: <strong>Low-Cost IoT Monitoring System</strong></div>
+            </div>
+        </div>
+        
+        <div class="dashboard">
+            <div class="node-card" id="node1-card">
+                <div class="node-header">
+                    <i class="fas fa-sensor node-icon"></i>
+                    <div class="node-id">Node 1</div>
+                </div>
+                <div class="distance-value" id="node1-distance">--.--</div>
+                <div class="distance-unit">centimeters</div>
+                
+                <div class="health-indicator">
+                    <div class="health-bar" id="node1-health" style="width: 0%"></div>
+                </div>
+                
+                <div class="status" id="node1-status">
+                    <i class="fas fa-circle-notch fa-spin"></i> LOADING
+                </div>
+                <div class="timestamp" id="node1-time">Updated: --</div>
+            </div>
+            
+            <div class="node-card" id="node2-card">
+                <div class="node-header">
+                    <i class="fas fa-sensor node-icon"></i>
+                    <div class="node-id">Node 2</div>
+                </div>
+                <div class="distance-value" id="node2-distance">--.--</div>
+                <div class="distance-unit">centimeters</div>
+                
+                <div class="health-indicator">
+                    <div class="health-bar" id="node2-health" style="width: 0%"></div>
+                </div>
+                
+                <div class="status" id="node2-status">
+                    <i class="fas fa-circle-notch fa-spin"></i> LOADING
+                </div>
+                <div class="timestamp" id="node2-time">Updated: --</div>
+            </div>
+            
+            <div class="node-card" id="node3-card">
+                <div class="node-header">
+                    <i class="fas fa-sensor node-icon"></i>
+                    <div class="node-id">Node 3</div>
+                </div>
+                <div class="distance-value" id="node3-distance">--.--</div>
+                <div class="distance-unit">centimeters</div>
+                
+                <div class="health-indicator">
+                    <div class="health-bar" id="node3-health" style="width: 0%"></div>
+                </div>
+                
+                <div class="status" id="node3-status">
+                    <i class="fas fa-circle-notch fa-spin"></i> LOADING
+                </div>
+                <div class="timestamp" id="node3-time">Updated: --</div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <div class="system-info">
+                <div><span class="value-label">Firebase Connection:</span> <span id="firebase-status">Connecting...</span></div>
+                <div><span class="value-label">Active Nodes:</span> <span id="active-nodes">0</span> of 3</div>
+                <div><span class="value-label">System Uptime:</span> <span id="uptime">00:00:00</span></div>
+            </div>
+            <div class="last-updated">
+                <div>Last refresh: <span id="current-time">--:--:--</span></div>
+                <div class="connection-status">
+                    <span class="connection-dot" id="connection-dot"></span>
+                    <span id="connection-status">Monitoring Structural Integrity</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>Designed and Hosted by Elegets Electronics</p>
+        <p>All rights reserved &copy; 2025</p>
+    </footer>
+
+    <div class="notification" id="notification"></div>
+
+    <script>
+        // Firebase configuration - REPLACE WITH YOUR VALUES
+        const firebaseConfig = {
+          apiKey: "AIzaSyDOrM7BA_ig1zqcBsOpv6BGcXoazAzp244",
+          authDomain: "shm-civil.firebaseapp.com",
+          databaseURL: "https://shm-civil-default-rtdb.firebaseio.com",
+          projectId: "shm-civil",
+          storageBucket: "shm-civil.firebasestorage.app",
+          messagingSenderId: "1001849336078",
+          appId: "1:1001849336078:web:3884be94641bfedd43275f",
+          measurementId: "G-NNPCNY94QQ"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // Global variables
+        let startTime = Date.now();
+        let activeNodes = 0;
+        let isConnected = false;
+
+        // DOM elements
+        const notification = document.getElementById('notification');
+        const connectionDot = document.getElementById('connection-dot');
+        const connectionStatus = document.getElementById('connection-status');
+        const firebaseStatus = document.getElementById('firebase-status');
+        const activeNodesElement = document.getElementById('active-nodes');
+        const uptimeElement = document.getElementById('uptime');
+        const currentTimeElement = document.getElementById('current-time');
+
+        // Show notification
+        function showNotification(message, type = 'success') {
+            notification.textContent = message;
+            notification.className = `notification ${type}`;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // Update uptime
+        function updateUptime() {
+            const now = Date.now();
+            const diff = now - startTime;
+            const hours = Math.floor(diff / 3600000);
+            const minutes = Math.floor((diff % 3600000) / 60000);
+            const seconds = Math.floor((diff % 60000) / 1000);
+            
+            uptimeElement.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        // Update current time
+        function updateCurrentTime() {
+            const now = new Date();
+            currentTimeElement.textContent = now.toLocaleTimeString();
+        }
+
+        // Calculate health status
+        function calculateHealthStatus(distance) {
+            if (distance < 10) return { status: 'critical', width: 100 };
+            if (distance < 20) return { status: 'warning', width: 70 };
+            return { status: 'good', width: 30 };
+        }
+
+        // Format timestamp
+        function formatTimestamp(timestamp) {
+            if (!timestamp) return 'Never';
+            
+            const now = Date.now();
+            const diff = now - timestamp;
+            const minutes = Math.floor(diff / 60000);
+            const hours = Math.floor(minutes / 60);
+            
+            if (minutes < 1) return 'Just now';
+            if (minutes < 60) return `${minutes}m ago`;
+            if (hours < 24) return `${hours}h ago`;
+            return new Date(timestamp).toLocaleDateString();
+        }
+
+        // Update node UI
+        function updateNodeUI(nodeId, data) {
+            const distance = data.distance || 0;
+            const timestamp = data.timestamp || 0;
+            const online = data.online || false;
+            
+            const distanceElement = document.getElementById(`node${nodeId}-distance`);
+            const timeElement = document.getElementById(`node${nodeId}-time`);
+            const statusElement = document.getElementById(`node${nodeId}-status`);
+            const healthElement = document.getElementById(`node${nodeId}-health`);
+            const cardElement = document.getElementById(`node${nodeId}-card`);
+            
+            // Update values
+            distanceElement.textContent = distance.toFixed(2);
+            timeElement.textContent = `Updated: ${formatTimestamp(timestamp)}`;
+            
+            // Update status
+            if (online) {
+                statusElement.innerHTML = '<i class="fas fa-wifi"></i> ONLINE';
+                statusElement.className = 'status status-online';
+                cardElement.classList.add('online');
+                cardElement.classList.remove('offline');
+                
+                // Update health indicator
+                const health = calculateHealthStatus(distance);
+                healthElement.className = `health-bar health-${health.status}`;
+                healthElement.style.width = `${health.width}%`;
+            } else {
+                statusElement.innerHTML = '<i class="fas fa-unlink"></i> OFFLINE';
+                statusElement.className = 'status status-offline';
+                cardElement.classList.add('offline');
+                cardElement.classList.remove('online');
+                
+                healthElement.className = 'health-bar';
+                healthElement.style.width = '0%';
+            }
+        }
+
+        // Listen for Firebase connection status
+        function monitorConnection() {
+            const connectedRef = database.ref(".info/connected");
+            connectedRef.on("value", function(snap) {
+                isConnected = snap.val() === true;
+                
+                if (isConnected) {
+                    connectionDot.className = 'connection-dot connected';
+                    connectionStatus.textContent = 'Connected to Firebase';
+                    firebaseStatus.textContent = 'Connected';
+                    showNotification('Connected to Firebase Realtime Database', 'success');
+                } else {
+                    connectionDot.className = 'connection-dot disconnected';
+                    connectionStatus.textContent = 'Disconnected from Firebase';
+                    firebaseStatus.textContent = 'Disconnected';
+                    showNotification('Disconnected from Firebase', 'error');
+                }
+            });
+        }
+
+        // Listen for data changes
+        function setupFirebaseListeners() {
+            // Listen for all nodes
+            for (let i = 1; i <= 3; i++) {
+                const nodeRef = database.ref(`/sensors/node${i}`);
+                
+                nodeRef.on('value', (snapshot) => {
+                    const data = snapshot.val();
+                    if (data) {
+                        updateNodeUI(i, data);
+                        
+                        // Update active nodes count
+                        if (data.online) {
+                            if (!document.getElementById(`node${i}-card`).classList.contains('online')) {
+                                activeNodes++;
+                                activeNodesElement.textContent = activeNodes;
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        // Initialize the application
+        function initApp() {
+            // Start timers
+            setInterval(updateUptime, 1000);
+            setInterval(updateCurrentTime, 1000);
+            
+            // Set initial values
+            updateUptime();
+            updateCurrentTime();
+            
+            // Monitor Firebase connection
+            monitorConnection();
+            
+            // Setup Firebase listeners
+            setupFirebaseListeners();
+            
+            showNotification('Dashboard initialized. Connecting to Firebase...', 'success');
+        }
+
+        // Start the application when the page loads
+        window.addEventListener('load', initApp);
+    </script>
+</body>
+</html>
+
