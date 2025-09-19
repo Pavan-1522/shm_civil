@@ -1,0 +1,81 @@
+<!-- …header & styles same as previous version… -->
+
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <h1><i class="fas fa-seedling"></i> Smart Agriculture</h1>
+      <div class="subtitle">An IoT-based system for monitoring and automation using ESP32</div>
+      <div class="project-info">
+        <div class="info-item">Technology: <strong>ESP32, DHT11, Soil Sensors, Ultrasonic, Relay</strong></div>
+        <div class="info-item">Framework: <strong>IoT-based Smart Agriculture</strong></div>
+      </div>
+    </div>
+
+    <!-- Dashboard -->
+    <div class="dashboard">
+      <!-- Soil Zone 1 -->
+      <div class="node-card" id="soil1-card">
+        <div class="node-header">
+          <i class="fas fa-water node-icon"></i>
+          <div class="node-id">Soil Zone 1</div>
+        </div>
+        <div class="distance-value" id="soil1-value">--</div>
+        <div class="distance-unit">%</div>
+        <div class="status" id="soil1-status">LOADING...</div>
+        <div class="timestamp" id="soil1-time">Updated: --</div>
+      </div>
+
+      <!-- Soil Zone 2 -->
+      <div class="node-card" id="soil2-card">
+        <div class="node-header">
+          <i class="fas fa-water node-icon"></i>
+          <div class="node-id">Soil Zone 2</div>
+        </div>
+        <div class="distance-value" id="soil2-value">--</div>
+        <div class="distance-unit">%</div>
+        <div class="status" id="soil2-status">LOADING...</div>
+        <div class="timestamp" id="soil2-time">Updated: --</div>
+      </div>
+
+      <!-- Tank Water Level -->
+      <div class="node-card" id="tank-card">
+        <div class="node-header">
+          <i class="fas fa-tint node-icon"></i>
+          <div class="node-id">Tank Level</div>
+        </div>
+        <div class="distance-value" id="tank-value">--</div>
+        <div class="distance-unit">cm</div>
+        <div class="status" id="tank-status">LOADING...</div>
+        <div class="timestamp" id="tank-time">Updated: --</div>
+      </div>
+
+      <!-- Temperature & Humidity -->
+      <div class="node-card" id="dht-card">
+        <div class="node-header">
+          <i class="fas fa-thermometer-half node-icon"></i>
+          <div class="node-id">Temperature &amp; Humidity</div>
+        </div>
+        <div class="distance-value" id="temp-value">-- °C</div>
+        <div class="distance-unit" id="hum-value">-- % RH</div>
+        <div class="status" id="dht-status">LOADING...</div>
+        <div class="timestamp" id="dht-time">Updated: --</div>
+      </div>
+    </div>
+
+    <!-- Footer (same) -->
+    <div class="footer">
+      <!-- …same footer content… -->
+    </div>
+  </div>
+
+  <footer>
+    <p>Designed and Hosted by Elegets Electronics</p>
+    <p>All rights reserved &copy; 2025</p>
+  </footer>
+
+  <!-- Firebase Script -->
+  <script>
+    // keep your existing firebase config & JS here
+  </script>
+</body>   
