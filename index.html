@@ -200,40 +200,49 @@
         .timestamp {
             color: var(--light);
             font-size: 0.9rem;
-            margin-top: 15px;
-            font-style: italic;
-        }
-        
-        .health-indicator {
-            height: 10px;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 5px;
-            margin: 20px 0;
-            overflow: hidden;
-            position: relative;
+            margin-top: 10px;
         }
         
         .health-bar {
-            height: 100%;
-            border-radius: 5px;
-            transition: all 0.5s ease;
-            position: relative;
-        }
-        
-        .health-bar::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-            animation: shimmer 2s infinite;
+            height: 8px;
+            border-radius: 4px;
+            margin: 15px 0;
+            transition: all 0.3s ease;
         }
         
         .health-good { background: var(--success); }
         .health-warning { background: var(--warning); }
         .health-critical { background: var(--danger); }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 10px;
+            color: white;
+            font-weight: 600;
+            z-index: 1000;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            transform: translateX(150%);
+            transition: transform 0.3s ease;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        .notification.success {
+            background: var(--success);
+        }
+        
+        .notification.error {
+            background: var(--danger);
+        }
+        
+        .notification.warning {
+            background: var(--warning);
+        }
         
         .footer {
             background: var(--header-bg);
@@ -341,169 +350,106 @@
         
         .loading {
             opacity: 0.7;
-            pointer-events: none;
+            position: relative;
+            overflow: hidden;
         }
         
-        .notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 15px 20px;
-            border-radius: 10px;
-            color: white;
-            font-weight: 600;
-            z-index: 1000;
-            transform: translateX(100%);
-            transition: transform 0.3s ease;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-        }
-        
-        .notification.show {
-            transform: translateX(0);
-        }
-        
-        .notification.success {
-            background: var(--success);
-        }
-        
-        .notification.error {
-            background: var(--danger);
-        }
-        
-        .chart-container {
-            background: var(--card-bg);
-            padding: 20px;
-            border-radius: 15px;
-            margin-top: 20px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        
-        .tab-container {
-            margin-top: 20px;
-        }
-        
-        .tabs {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-        
-        .tab {
-            padding: 10px 20px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        
-        .tab.active {
-            background: var(--secondary);
-            color: white;
-        }
-        
-        .tab-content {
-            display: none;
-        }
-        
-        .tab-content.active {
-            display: block;
+        .loading::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: shimmer 2s infinite;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1><i class="fas fa-hard-hat"></i> Advanced Structural Health Monitoring</h1>
-            <div class="subtitle">A Low-Cost Framework for Real-Time Structural Health Monitoring of Beams Using Ultrasonic Sensing</div>
+            <h1><i class="fas fa-hard-hat"></i> Structural Health Monitoring</h1>
+            <p class="subtitle">Real-time Bridge Deflection Monitoring System</p>
             <div class="project-info">
-                <div class="info-item">Guided by: <strong>Dr. G. Ganesh Prabhu</strong></div>
-                <div class="info-item">Technology: <strong>ESP32, Ultrasonic Sensors, Firebase</strong></div>
-                <div class="info-item">Framework: <strong>Low-Cost IoT Monitoring System</strong></div>
+                <div class="info-item"><strong>Project:</strong> Bridge Safety Monitoring</div>
+                <div class="info-item"><strong>Location:</strong> Main River Bridge</div>
+                <div class="info-item"><strong>Nodes:</strong> 3 Sensors</div>
             </div>
         </div>
         
         <div class="dashboard">
-            <div class="node-card" id="node1-card">
+            <!-- Node 1 -->
+            <div class="node-card online" id="node1-card">
                 <div class="node-header">
                     <i class="fas fa-sensor node-icon"></i>
                     <div class="node-id">Node 1</div>
                 </div>
-                <div class="distance-value" id="node1-distance">--.--</div>
-                <div class="distance-unit">centimeters</div>
-                
-                <div class="health-indicator">
-                    <div class="health-bar" id="node1-health" style="width: 0%"></div>
+                <div class="distance-value" id="node1-distance">0.00</div>
+                <div class="distance-unit">cm Deflection</div>
+                <div class="status status-online" id="node1-status">
+                    <i class="fas fa-wifi"></i> ONLINE
                 </div>
-                
-                <div class="status" id="node1-status">
-                    <i class="fas fa-circle-notch fa-spin"></i> LOADING
-                </div>
-                <div class="timestamp" id="node1-time">Updated: --</div>
+                <div class="health-bar health-good" id="node1-health"></div>
+                <div class="timestamp" id="node1-time">Updated: Just now</div>
             </div>
             
-            <div class="node-card" id="node2-card">
+            <!-- Node 2 -->
+            <div class="node-card online" id="node2-card">
                 <div class="node-header">
                     <i class="fas fa-sensor node-icon"></i>
                     <div class="node-id">Node 2</div>
                 </div>
-                <div class="distance-value" id="node2-distance">--.--</div>
-                <div class="distance-unit">centimeters</div>
-                
-                <div class="health-indicator">
-                    <div class="health-bar" id="node2-health" style="width: 0%"></div>
+                <div class="distance-value" id="node2-distance">0.00</div>
+                <div class="distance-unit">cm Deflection</div>
+                <div class="status status-online" id="node2-status">
+                    <i class="fas fa-wifi"></i> ONLINE
                 </div>
-                
-                <div class="status" id="node2-status">
-                    <i class="fas fa-circle-notch fa-spin"></i> LOADING
-                </div>
-                <div class="timestamp" id="node2-time">Updated: --</div>
+                <div class="health-bar health-good" id="node2-health"></div>
+                <div class="timestamp" id="node2-time">Updated: Just now</div>
             </div>
             
-            <div class="node-card" id="node3-card">
+            <!-- Node 3 -->
+            <div class="node-card online" id="node3-card">
                 <div class="node-header">
                     <i class="fas fa-sensor node-icon"></i>
                     <div class="node-id">Node 3</div>
                 </div>
-                <div class="distance-value" id="node3-distance">--.--</div>
-                <div class="distance-unit">centimeters</div>
-                
-                <div class="health-indicator">
-                    <div class="health-bar" id="node3-health" style="width: 0%"></div>
+                <div class="distance-value" id="node3-distance">0.00</div>
+                <div class="distance-unit">cm Deflection</div>
+                <div class="status status-online" id="node3-status">
+                    <i class="fas fa-wifi"></i> ONLINE
                 </div>
-                
-                <div class="status" id="node3-status">
-                    <i class="fas fa-circle-notch fa-spin"></i> LOADING
-                </div>
-                <div class="timestamp" id="node3-time">Updated: --</div>
+                <div class="health-bar health-good" id="node3-health"></div>
+                <div class="timestamp" id="node3-time">Updated: Just now</div>
             </div>
         </div>
         
         <div class="footer">
             <div class="system-info">
-                <div><span class="value-label">Firebase Connection:</span> <span id="firebase-status">Connecting...</span></div>
-                <div><span class="value-label">Active Nodes:</span> <span id="active-nodes">0</span> of 3</div>
+                <div><span class="value-label">Active Nodes:</span> <span id="active-nodes">3</span>/3</div>
                 <div><span class="value-label">System Uptime:</span> <span id="uptime">00:00:00</span></div>
+                <div><span class="value-label">Firebase Status:</span> <span id="firebase-status">Connected</span></div>
             </div>
             <div class="last-updated">
-                <div>Last refresh: <span id="current-time">--:--:--</span></div>
+                <div><span class="value-label">Current Time:</span> <span id="current-time">00:00:00</span></div>
                 <div class="connection-status">
-                    <span class="connection-dot" id="connection-dot"></span>
-                    <span id="connection-status">Monitoring Structural Integrity</span>
+                    <span class="connection-dot connected" id="connection-dot"></span>
+                    <span id="connection-status">Connected to Firebase</span>
                 </div>
             </div>
         </div>
+        
+        <footer>
+            <p>Advanced Structural Health Monitoring System &copy; 2023</p>
+            <p>Real-time monitoring for bridge safety and infrastructure integrity</p>
+        </footer>
     </div>
-
-    <footer>
-        <p>Designed and Hosted by Elegets Electronics</p>
-        <p>All rights reserved &copy; 2025</p>
-    </footer>
-
+    
     <div class="notification" id="notification"></div>
 
     <script>
-        // Firebase configuration - REPLACE WITH YOUR VALUES
+        // Firebase configuration
         const firebaseConfig = {
           apiKey: "AIzaSyDOrM7BA_ig1zqcBsOpv6BGcXoazAzp244",
           authDomain: "shm-civil.firebaseapp.com",
@@ -516,41 +462,42 @@
         };
 
         // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
+        const app = firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
         // Global variables
-        let startTime = Date.now();
-        let activeNodes = 0;
         let isConnected = false;
+        let activeNodes = 3;
+        let startTime = Date.now();
+        let alertStates = { node1: false, node2: false, node3: false };
+        const baselineDistances = { node1: 13, node2: 13, node3: 13 };
 
         // DOM elements
-        const notification = document.getElementById('notification');
-        const connectionDot = document.getElementById('connection-dot');
-        const connectionStatus = document.getElementById('connection-status');
-        const firebaseStatus = document.getElementById('firebase-status');
         const activeNodesElement = document.getElementById('active-nodes');
         const uptimeElement = document.getElementById('uptime');
+        const firebaseStatus = document.getElementById('firebase-status');
         const currentTimeElement = document.getElementById('current-time');
+        const connectionDot = document.getElementById('connection-dot');
+        const connectionStatus = document.getElementById('connection-status');
+        const notificationElement = document.getElementById('notification');
 
         // Show notification
-        function showNotification(message, type = 'success') {
-            notification.textContent = message;
-            notification.className = `notification ${type}`;
-            notification.classList.add('show');
+        function showNotification(message, type = 'info') {
+            notificationElement.textContent = message;
+            notificationElement.className = `notification ${type} show`;
             
             setTimeout(() => {
-                notification.classList.remove('show');
-            }, 3000);
+                notificationElement.classList.remove('show');
+            }, 5000);
         }
 
         // Update uptime
         function updateUptime() {
             const now = Date.now();
             const diff = now - startTime;
-            const hours = Math.floor(diff / 3600000);
-            const minutes = Math.floor((diff % 3600000) / 60000);
-            const seconds = Math.floor((diff % 60000) / 1000);
+            const seconds = Math.floor(diff / 1000) % 60;
+            const minutes = Math.floor(diff / 1000 / 60) % 60;
+            const hours = Math.floor(diff / 1000 / 60 / 60);
             
             uptimeElement.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
         }
@@ -561,11 +508,15 @@
             currentTimeElement.textContent = now.toLocaleTimeString();
         }
 
-        // Calculate health status
-        function calculateHealthStatus(distance) {
-            if (distance < 10) return { status: 'critical', width: 100 };
-            if (distance < 20) return { status: 'warning', width: 70 };
-            return { status: 'good', width: 30 };
+        // Calculate health status BASED ON DEFLECTION
+        function calculateHealthStatus(deflection) {
+            // Get the absolute value for the health bar
+            const absDeflection = Math.abs(deflection);
+            
+            // Adjust these thresholds as needed
+            if (absDeflection > 3.0) return { status: 'critical', width: 100 }; // Critical deflection
+            if (absDeflection > 1.5) return { status: 'warning', width: 70 }; // Warning
+            return { status: 'good', width: 30 }; // Safe
         }
 
         // Format timestamp
@@ -585,9 +536,20 @@
 
         // Update node UI
         function updateNodeUI(nodeId, data) {
-            const distance = data.distance || 0;
+            const currentDistance = data.distance || 0;
             const timestamp = data.timestamp || 0;
             const online = data.online || false;
+            const nodeIdStr = `node${nodeId}`;
+
+            // Get baseline
+            const baseline = baselineDistances[nodeIdStr];
+            // If baseline isn't set, default to 12
+            const actualBaseline = baseline !== undefined ? baseline : 12;
+            
+            // Calculate deflection as baseline - distance
+            // This will be positive (e.g., 0.96) for 11.04
+            // This will be negative (e.g., -1.0) for 13.0
+            const deflection = actualBaseline - currentDistance; 
             
             const distanceElement = document.getElementById(`node${nodeId}-distance`);
             const timeElement = document.getElementById(`node${nodeId}-time`);
@@ -596,9 +558,24 @@
             const cardElement = document.getElementById(`node${nodeId}-card`);
             
             // Update values
-            distanceElement.textContent = distance.toFixed(2);
+            distanceElement.textContent = deflection.toFixed(2); // Show deflection
             timeElement.textContent = `Updated: ${formatTimestamp(timestamp)}`;
             
+            // Alert logic based on ABSOLUTE deflection
+            if (Math.abs(deflection) > 3.0) {
+                // Only show alert if it hasn't been shown for this node yet
+                if (!alertStates[nodeIdStr]) {
+                    showNotification(`CRITICAL ALERT: Node ${nodeId} deflection is ${deflection.toFixed(2)} cm!`, 'error');
+                    alertStates[nodeIdStr] = true; // Set flag to true
+                }
+            } else {
+                // Reset the alert flag if the deflection goes back to safe levels
+                if (alertStates[nodeIdStr]) {
+                    showNotification(`Node ${nodeId} deflection is back to safe levels.`, 'success');
+                    alertStates[nodeIdStr] = false; // Reset flag
+                }
+            }
+
             // Update status
             if (online) {
                 statusElement.innerHTML = '<i class="fas fa-wifi"></i> ONLINE';
@@ -607,7 +584,7 @@
                 cardElement.classList.remove('offline');
                 
                 // Update health indicator
-                const health = calculateHealthStatus(distance);
+                const health = calculateHealthStatus(deflection); // Pass deflection
                 healthElement.className = `health-bar health-${health.status}`;
                 healthElement.style.width = `${health.width}%`;
             } else {
@@ -643,25 +620,39 @@
 
         // Listen for data changes
         function setupFirebaseListeners() {
-            // Listen for all nodes
-            for (let i = 1; i <= 3; i++) {
-                const nodeRef = database.ref(`/sensors/node${i}`);
+            const nodesRef = database.ref('/sensors');
+            
+            nodesRef.on('value', (snapshot) => {
+                const sensors = snapshot.val();
+                if (!sensors) {
+                    activeNodesElement.textContent = 0;
+                    // Set all nodes to offline if /sensors is empty
+                    for (let i = 1; i <= 3; i++) {
+                        updateNodeUI(i, { distance: 0, timestamp: 0, online: false });
+                    }
+                    return;
+                }
+
+                let currentActiveNodes = 0;
                 
-                nodeRef.on('value', (snapshot) => {
-                    const data = snapshot.val();
+                for (let i = 1; i <= 3; i++) {
+                    const nodeKey = `node${i}`;
+                    const data = sensors[nodeKey];
+                    
                     if (data) {
                         updateNodeUI(i, data);
-                        
-                        // Update active nodes count
                         if (data.online) {
-                            if (!document.getElementById(`node${i}-card`).classList.contains('online')) {
-                                activeNodes++;
-                                activeNodesElement.textContent = activeNodes;
-                            }
+                            currentActiveNodes++;
                         }
+                    } else {
+                        // If data for a node is missing, treat it as offline
+                        updateNodeUI(i, { distance: 0, timestamp: 0, online: false });
                     }
-                });
-            }
+                }
+                
+                activeNodes = currentActiveNodes;
+                activeNodesElement.textContent = activeNodes;
+            });
         }
 
         // Initialize the application
@@ -673,6 +664,14 @@
             // Set initial values
             updateUptime();
             updateCurrentTime();
+
+            // Update labels to "Deflection"
+            for (let i = 1; i <= 3; i++) {
+                const unitElement = document.getElementById(`node${i}-card`).querySelector('.distance-unit');
+                if (unitElement) {
+                    unitElement.textContent = 'cm Deflection';
+                }
+            }
             
             // Monitor Firebase connection
             monitorConnection();
@@ -688,4 +687,3 @@
     </script>
 </body>
 </html>
-
